@@ -1,0 +1,8 @@
+{
+  "id": "feature.camera",
+  "name": "First Person Camera",
+  "version": "1.0.0",
+  "type": "gameplay.camera",
+  "description": "Kamera sudut pandang orang pertama dengan kalkulasi View Matrix dan Pitch Clamping",
+  "dependencies": ["core.math"]
+}

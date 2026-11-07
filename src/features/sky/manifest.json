@@ -1,0 +1,8 @@
+{
+  "id": "feature.sky",
+  "name": "Minecraft Sky Gradient",
+  "version": "1.0.0",
+  "type": "gameplay.environment",
+  "description": "Procedural horizon-to-zenith blue sky renderer ala Minecraft",
+  "dependencies": ["core.render"]
+}

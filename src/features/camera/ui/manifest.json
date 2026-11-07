@@ -1,0 +1,7 @@
+{
+  "id": "feature.camera.ui",
+  "name": "Perspective UI Controls",
+  "version": "1.0.0",
+  "description": "Tombol kontrol kamera atas-tengah khas Minecraft PE dengan tekstur pixelated 8x8",
+  "dependencies": ["feature.camera"]
+}

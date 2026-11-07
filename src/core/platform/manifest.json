@@ -1,0 +1,7 @@
+{
+  "id": "core.platform",
+  "name": "Platform & Device Guard",
+  "version": "1.0.0",
+  "description": "Memastikan eksekusi hanya valid pada Android Touchscreen",
+  "entry": "device-guard.js"
+}

@@ -1,0 +1,6 @@
+{
+  "id": "player.model.parser",
+  "name": "Bedrock Geometry Mesh Parser",
+  "version": "1.0.0",
+  "description": "Parser format Bedrock 1.12.0 ke Vertex Buffer WebGL"
+}

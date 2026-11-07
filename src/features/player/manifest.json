@@ -1,0 +1,7 @@
+{
+  "id": "feature.player",
+  "name": "Player & Hand Renderer",
+  "version": "1.0.0",
+  "type": "gameplay.player",
+  "dependencies": ["core.render", "core.math"]
+}

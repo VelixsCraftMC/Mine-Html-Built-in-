@@ -1,0 +1,6 @@
+{
+  "id": "core.math",
+  "name": "Math 3D Utilities",
+  "version": "1.0.0",
+  "description": "Kompilasi operasi matriks 4x4 dan vektor ringan performa tinggi tanpa GC leak"
+}

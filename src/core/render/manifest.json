@@ -1,0 +1,7 @@
+{
+  "id": "core.render",
+  "name": "WebGL Rendering Pipeline",
+  "version": "1.0.0",
+  "description": "Pengelolaan WebGL2 context, pipeline lifecycle, dan compiling shader anti-leak",
+  "dependencies": ["core.platform"]
+}
