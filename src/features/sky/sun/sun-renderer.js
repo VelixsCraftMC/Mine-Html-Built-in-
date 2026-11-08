@@ -1,7 +1,7 @@
-import { ShaderProgram } from "../../../core/render/shader-program.js";
-import { TextureLoader } from "../../../core/render/texture-loader.js";
-import { FullscreenQuad } from "../../../core/render/fullscreen-quad.js";
-import { SunShaderSource } from "./shaders/sun-glsl.js";
+import { ShaderProgram } from "../../../shaders/RenderVulkan/shader-program.js";
+import { TextureLoader } from "../../../shaders/RenderVulkan/texture-loader.js";
+import { FullscreenQuad } from "../../../shaders/RenderVulkan/fullscreen-quad.js";
+import { ShaderPack } from "../../../shaders/shader-pack.js";
 
 const TEXTURE = "assets/sky/sun.png";
 const DISTANCE = 100;      // jarak billboard dari kamera (blok)
@@ -14,7 +14,7 @@ const HIDE_BELOW = -0.35;  // sin(elevasi) di bawah ini = jauh di bawah cakrawal
 export class SunRenderer {
   constructor(glContext, elevation = 40) {
     const gl = this.gl = glContext.getGL();
-    this.program = ShaderProgram.create(gl, SunShaderSource.vertex, SunShaderSource.fragment);
+    this.program = ShaderPack.create(gl, "sun");
     const loc = n => gl.getUniformLocation(this.program, n);
     this.u = { proj: loc("u_projection"), view: loc("u_view"), center: loc("u_center"),
       right: loc("u_right"), up: loc("u_up"), tex: loc("u_texture") };

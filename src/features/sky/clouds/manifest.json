@@ -1,8 +1,13 @@
 {
   "id": "feature.sky.clouds",
   "name": "Minecraft Clouds",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "gameplay.environment",
   "description": "Awan datar ala Minecraft dari assets/sky/clouds.png (1 piksel = 12x12 blok) di ketinggian 128, bergeser 0,6 blok/detik, memudar di kejauhan. Satu pass layar penuh tanpa geometri",
-  "dependencies": ["core.render", "feature.camera", "feature.sky"]
+  "dependencies": [
+    "shaders.render",
+    "feature.camera",
+    "feature.sky",
+    "shaders"
+  ]
 }

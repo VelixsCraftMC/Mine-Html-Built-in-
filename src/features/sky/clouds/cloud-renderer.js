@@ -1,8 +1,7 @@
-import { ShaderProgram } from "../../../core/render/shader-program.js";
-import { TextureLoader } from "../../../core/render/texture-loader.js";
-import { FullscreenQuad } from "../../../core/render/fullscreen-quad.js";
-import { SkyShaderSource } from "../shaders/sky-glsl.js";
-import { CloudShaderFragment } from "./shaders/cloud-glsl.js";
+import { ShaderProgram } from "../../../shaders/RenderVulkan/shader-program.js";
+import { TextureLoader } from "../../../shaders/RenderVulkan/texture-loader.js";
+import { FullscreenQuad } from "../../../shaders/RenderVulkan/fullscreen-quad.js";
+import { ShaderPack } from "../../../shaders/shader-pack.js";
 
 const TEXTURE = "assets/sky/clouds.png"; // 256x256, 1 piksel = 1 sel awan 12x12 blok
 const CLOUD_Y = 128;                       // tinggi bidang awan (blok)
@@ -13,7 +12,7 @@ const WIND = 0.6;                          // blok/detik (0,03 blok/tick ala Min
 export class CloudRenderer {
   constructor(glContext) {
     const gl = this.gl = glContext.getGL();
-    this.program = ShaderProgram.create(gl, SkyShaderSource.vertex, CloudShaderFragment);
+    this.program = ShaderPack.create(gl, "clouds");
     const loc = n => gl.getUniformLocation(this.program, n);
     this.u = { inv: loc("u_invViewProj"), tex: loc("u_texture"), cam: loc("u_camPos"), cloud: loc("u_cloud") };
     this.quad = FullscreenQuad.create(gl);

@@ -1,4 +1,4 @@
-import { TextureLoader } from "../../../core/render/texture-loader.js";
+import { TextureLoader } from "../../../shaders/RenderVulkan/texture-loader.js";
 
 const FONT = "bold 28px monospace";
 const HEIGHT_PX = 36;

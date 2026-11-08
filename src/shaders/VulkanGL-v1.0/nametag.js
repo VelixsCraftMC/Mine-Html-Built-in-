@@ -1,5 +1,5 @@
 // Billboard: pusat label dihitung di ruang kamera, sehingga selalu menghadap layar
-export const NametagShaderSource = {
+export const NametagShader = {
   vertex: `#version 300 es
     layout(location = 0) in vec2 a_corner; // -0.5..0.5
     uniform mat4 u_projection;

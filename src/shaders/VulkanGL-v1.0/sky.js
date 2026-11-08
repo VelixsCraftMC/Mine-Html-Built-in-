@@ -1,4 +1,4 @@
-export const SkyShaderSource = {
+export const SkyShader = {
   vertex: `#version 300 es
     layout(location = 0) in vec2 a_position;
     uniform mat4 u_invViewProj;

@@ -1,6 +1,7 @@
-import { ShaderProgram } from "../../core/render/shader-program.js";
-import { TextureLoader } from "../../core/render/texture-loader.js";
-import { MeshVao } from "../../core/render/mesh-vao.js";
+import { ShaderProgram } from "../../shaders/RenderVulkan/shader-program.js";
+import { ShaderPack } from "../../shaders/shader-pack.js";
+import { TextureLoader } from "../../shaders/RenderVulkan/texture-loader.js";
+import { MeshVao } from "../../shaders/RenderVulkan/mesh-vao.js";
 import { GeoParser } from "./model/geo-parser.js";
 import { BoneMesh } from "./model/bone-mesh.js";
 import { CapeMesh } from "./model/cape-mesh.js";
@@ -8,7 +9,6 @@ import { BodyHelper } from "./model/body-helper.js";
 import { PlayerPose } from "./player-pose.js";
 import { PlayerAnimator } from "./animation/player-animator.js";
 import { CapePhysics } from "./animation/cape-physics.js";
-import { PlayerShaderSource } from "./shaders/player-glsl.js";
 import { PerspectiveMode } from "../camera/camera.js";
 import { Mat4 } from "../../core/math/mat4.js";
 import { Options } from "../../core/options/options.js";
@@ -45,7 +45,7 @@ export class PlayerRenderer {
 
   init() {
     const gl = this.gl;
-    this.program = ShaderProgram.create(gl, PlayerShaderSource.vertex, PlayerShaderSource.fragment);
+    this.program = ShaderPack.create(gl, "player");
     // Lokasi uniform di-cache sekali, bukan dicari setiap frame
     this.u = {
       proj: gl.getUniformLocation(this.program, "u_projection"),

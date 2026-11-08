@@ -1,0 +1,10 @@
+{
+  "id": "shaders",
+  "name": "Shader Packs",
+  "version": "1.1.0",
+  "description": "Semua shader dan render ada di folder ini: RenderVulkan (pipeline render WebGL2) dan satu folder per shader pack (bawaan: VulkanGL-v1.0). Fitur membuat program lewat ShaderPack.create(gl, nama) sehingga ganti/tambah pack (mod) tidak mengubah file fitur. Shader yang tidak ada di pack aktif memakai milik VulkanGL",
+  "dependencies": [
+    "shaders.render"
+  ],
+  "default": "shaders.vulkangl"
+}

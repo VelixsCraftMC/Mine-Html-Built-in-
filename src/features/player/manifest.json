@@ -1,13 +1,14 @@
 {
   "id": "feature.player",
   "name": "Player & Hand Renderer",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "type": "gameplay.player",
   "description": "Model pemain terpisah per bagian, tangan orang pertama (ikut view bobbing), pose jongkok, badan menyusul kepala saat memukul/bergerak, orientasi/UV/cahaya ala Minecraft; skin dan jubah dari option.json (jubah kosong = tanpa jubah, file hilang = default)",
   "dependencies": [
-    "core.render",
+    "shaders.render",
     "core.options",
     "core.math",
-    "feature.camera"
+    "feature.camera",
+    "shaders"
   ]
 }

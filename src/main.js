@@ -1,6 +1,6 @@
 import { DeviceGuard } from "./core/platform/device-guard.js";
 import { OrientationLock } from "./core/platform/orientation-lock.js";
-import { WebGLContext } from "./core/render/webgl-context.js";
+import { WebGLContext } from "./shaders/RenderVulkan/webgl-context.js";
 import { TouchLook } from "./core/input/touch-look.js";
 import { TouchAction } from "./core/input/touch-action.js";
 import { TouchRing } from "./core/input/touch-ring.js";

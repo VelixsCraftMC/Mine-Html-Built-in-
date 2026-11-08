@@ -1,6 +1,6 @@
-import { ShaderProgram } from "../../../core/render/shader-program.js";
+import { ShaderProgram } from "../../../shaders/RenderVulkan/shader-program.js";
 import { PerspectiveMode } from "../../camera/camera.js";
-import { NametagShaderSource } from "./shaders/nametag-glsl.js";
+import { ShaderPack } from "../../../shaders/shader-pack.js";
 import { NametagTexture } from "./nametag-texture.js";
 
 const LABEL_HEIGHT = 0.25; // tinggi label (blok)
@@ -13,7 +13,7 @@ export class NametagRenderer {
   constructor(glContext, name) {
     this.gl = glContext.getGL();
     const gl = this.gl;
-    this.program = ShaderProgram.create(gl, NametagShaderSource.vertex, NametagShaderSource.fragment);
+    this.program = ShaderPack.create(gl, "nametag");
     this.u = {
       proj: gl.getUniformLocation(this.program, "u_projection"),
       center: gl.getUniformLocation(this.program, "u_center"),

@@ -1,6 +1,6 @@
 // Billboard di langit: hanya rotasi kamera yang dipakai (translasi dibuang), jadi matahari
 // selalu berada "di tak hingga" dan tidak ikut bergeser saat pemain berjalan.
-export const SunShaderSource = {
+export const SunShader = {
   vertex: `#version 300 es
     layout(location = 0) in vec2 a_corner; // -1..1 (FullscreenQuad)
     uniform mat4 u_projection;

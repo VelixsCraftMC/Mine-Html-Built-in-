@@ -1,13 +1,13 @@
-import { ShaderProgram } from "../../core/render/shader-program.js";
-import { FullscreenQuad } from "../../core/render/fullscreen-quad.js";
-import { SkyShaderSource } from "./shaders/sky-glsl.js";
+import { ShaderProgram } from "../../shaders/RenderVulkan/shader-program.js";
+import { FullscreenQuad } from "../../shaders/RenderVulkan/fullscreen-quad.js";
+import { ShaderPack } from "../../shaders/shader-pack.js";
 import { SunRenderer } from "./sun/sun-renderer.js";
 import { CloudRenderer } from "./clouds/cloud-renderer.js";
 
 export class SkyRenderer {
   constructor(glContext) {
     this.gl = glContext.getGL();
-    this.program = ShaderProgram.create(this.gl, SkyShaderSource.vertex, SkyShaderSource.fragment);
+    this.program = ShaderPack.create(this.gl, "sky");
     this.uInvViewProjLoc = this.gl.getUniformLocation(this.program, "u_invViewProj");
     this.quad = FullscreenQuad.create(this.gl);
     // Lapisan langit digambar berurutan (belakang -> depan). Tiap lapisan: render(camera) dan dispose().

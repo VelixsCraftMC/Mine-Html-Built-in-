@@ -1,0 +1,9 @@
+{
+  "id": "shaders.render",
+  "name": "RenderVulkan",
+  "version": "1.4.0",
+  "description": "Pipeline render WebGL2: WebGLContext, ShaderProgram (compile anti-leak), MeshVao (VAO+VBO dengan dispose lengkap), TextureLoader (fallback, fromCanvas, placeholder), dan FullscreenQuad. Dipakai semua fitur dan shader pack",
+  "dependencies": [
+    "core.platform"
+  ]
+}
