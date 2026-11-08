@@ -1,8 +1,11 @@
 {
   "id": "feature.player.animation",
   "name": "Player Animation",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "type": "gameplay.animation",
-  "description": "Animasi pukul/hancurkan dan napas idle ala Minecraft; sumber aksi cukup menyediakan consumeAttack() dan isMining()",
-  "dependencies": ["core.math", "feature.player"]
+  "description": "Animasi pukul/hancurkan, napas idle, ayunan jalan tangan-kaki, pose jongkok, dan fisika jubah (CapePhysics) ala Minecraft Java; sumber aksi cukup menyediakan consumeAttack() dan isMining()",
+  "dependencies": [
+    "core.math",
+    "feature.player"
+  ]
 }

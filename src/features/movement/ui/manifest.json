@@ -1,0 +1,9 @@
+{
+  "id": "feature.movement.ui",
+  "name": "Movement Touch Controls",
+  "version": "1.1.0",
+  "description": "D-pad 3x3 (geser antar arah + diagonal), tombol jongkok (toggle), lari (toggle), lompat (dua kali tap = terbang), dan terbang. Tekstur dari assets/control/<nama>.png dan <nama>_pressed.png",
+  "dependencies": [
+    "feature.movement"
+  ]
+}

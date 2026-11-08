@@ -15,7 +15,12 @@ export class BodyHelper {
     return angle - TWO_PI * Math.floor((angle + Math.PI) / TWO_PI);
   }
 
-  update(headYaw, dtMs) {
+  // follow = true (memukul/bergerak): badan menyusul arah kepala 30% per tick seperti Minecraft
+  update(headYaw, dtMs, follow = false) {
+    if (follow) {
+      const d = BodyHelper.wrapAngle(headYaw - this.bodyYaw);
+      this.bodyYaw += d * (1 - Math.pow(0.7, dtMs / TICK_MS));
+    }
     let delta = BodyHelper.wrapAngle(headYaw - this.bodyYaw);
     if (delta > MAX_NECK_TURN) delta = MAX_NECK_TURN;
     else if (delta < -MAX_NECK_TURN) delta = -MAX_NECK_TURN;

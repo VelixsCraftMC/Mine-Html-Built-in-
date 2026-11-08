@@ -7,13 +7,16 @@ import { CapeMesh } from "./model/cape-mesh.js";
 import { BodyHelper } from "./model/body-helper.js";
 import { PlayerPose } from "./player-pose.js";
 import { PlayerAnimator } from "./animation/player-animator.js";
+import { CapePhysics } from "./animation/cape-physics.js";
 import { PlayerShaderSource } from "./shaders/player-glsl.js";
 import { PerspectiveMode } from "../camera/camera.js";
+import { Mat4 } from "../../core/math/mat4.js";
 
 // [nama bone, relatif pivot?] - bagian yang bergerak dipisah agar bisa dianimasikan
 const BONES = {
   body: [["Body"], false],
-  legs: [["Right Leg", "Left Leg"], false],
+  rightLeg: [["Right Leg"], true],
+  leftLeg: [["Left Leg"], true],
   rightArm: [["Right Arm"], true],
   leftArm: [["Left Arm"], true],
   head: [["Head"], true]
@@ -30,6 +33,8 @@ export class PlayerRenderer {
     this.bodyHelper = new BodyHelper();
     this.pose = new PlayerPose();
     this.animator = new PlayerAnimator();
+    this.cape = new CapePhysics();
+    this.handTmp = Mat4.create();
     this.lastTime = performance.now();
     this.disposed = false;
     this.init();
@@ -81,15 +86,21 @@ export class PlayerRenderer {
   }
 
   // actions (opsional): objek dengan consumeAttack() dan isMining()
-  render(camera, actions) {
+  // state (opsional): PlayerState (pos, vel, crouch, moving, bob)
+  render(camera, actions, state = null) {
     if (!this.program) return;
     const gl = this.gl;
     const now = performance.now();
     const dt = Math.min(now - this.lastTime, 100);
     this.lastTime = now;
-    this.animator.update(dt, actions);
+    const dist = state ? Math.hypot(state.vel[0], state.vel[2]) * dt / 1000 : 0;
+    this.animator.update(dt, actions, dist);
     // Badan selalu diperbarui, termasuk saat orang pertama, seperti Minecraft
-    const bodyYaw = this.bodyHelper.update(camera.yaw, dt);
+    // Memukul atau bergerak: badan menyusul arah kepala
+    const follow = this.animator.swinging || (state !== null && state.moving);
+    const bodyYaw = this.bodyHelper.update(camera.yaw, dt, follow);
+
+    if (state) this.cape.update(state.pos, bodyYaw, state.walkDist, state.bobAmt, dt);
 
     gl.useProgram(this.program);
     gl.enable(gl.DEPTH_TEST);
@@ -99,12 +110,17 @@ export class PlayerRenderer {
 
     const mesh = this.meshes, skin = this.skinTex;
     if (camera.mode === PerspectiveMode.FIRST_PERSON) {
-      const h = this.pose.updateHand(this.animator.swingProgress);
+      let h = this.pose.updateHand(this.animator.swingProgress);
+      if (state) { // tangan ikut view bobbing
+        Mat4.multiply(this.handTmp, state.bob, h);
+        h = this.handTmp;
+      }
       this.draw(mesh.arm, skin, h, h);
     } else {
-      this.pose.update(camera, bodyYaw, this.animator);
+      this.pose.update(camera, bodyYaw, this.animator, state && state.crouch ? 1 : 0, state ? state.pos : undefined, this.cape);
       const m = this.pose.model, mv = this.pose.modelView;
-      this.draw(mesh.legs, skin, mv.legs, m.legs);
+      this.draw(mesh.rightLeg, skin, mv.rightLeg, m.rightLeg);
+      this.draw(mesh.leftLeg, skin, mv.leftLeg, m.leftLeg);
       this.draw(mesh.body, skin, mv.body, m.body);
       this.draw(mesh.rightArm, skin, mv.rightArm, m.rightArm);
       this.draw(mesh.leftArm, skin, mv.leftArm, m.leftArm);

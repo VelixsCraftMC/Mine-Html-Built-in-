@@ -1,4 +1,5 @@
 const HOLD_MS = 350; // tahan >= ini = menghancurkan (Minecraft PE)
+const RING_DELAY_MS = 90; // cincin baru muncul setelah ditahan sebentar (tap cepat tidak berkedip)
 const SLOP_PX = 12;  // geser lebih dari ini = mengarahkan kamera, bukan tap/tahan
 
 // Membedakan tap (serang) dan tahan (hancurkan) dari sentuhan pertama.
@@ -70,6 +71,14 @@ export class TouchAction {
       this.holding = true;
     }
     return this.holding;
+  }
+
+  // Progres cincin tahan 0..1, atau -1 bila tidak ada tahan diam yang sedang berlangsung
+  holdProgress() {
+    if (this.touchId === null || this.moved) return -1;
+    const el = this.now() - this.startTime;
+    if (el < RING_DELAY_MS) return -1;
+    return Math.min(1, (el - RING_DELAY_MS) / (HOLD_MS - RING_DELAY_MS));
   }
 
   // True satu kali untuk setiap tap

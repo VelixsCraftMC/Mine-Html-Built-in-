@@ -1,0 +1,10 @@
+{
+  "id": "feature.movement",
+  "name": "Player Movement",
+  "version": "1.1.0",
+  "type": "gameplay.movement",
+  "description": "Jalan, lari (toggle, berhenti saat maju dilepas/jongkok), jongkok, lompat, dan terbang berbasis waktu; view bobbing orang pertama; gerbang tahan-memukul saat di udara. Tanah disuplai lewat fungsi getGround.",
+  "dependencies": [
+    "core.math"
+  ]
+}

@@ -9,7 +9,7 @@ export const PerspectiveMode = {
 
 const MODE_COUNT = 3;
 const THIRD_PERSON_DIST = 4.0;  // jarak kamera orang ketiga (blok)
-const EYE_HEIGHT = 1.62;        // tinggi mata pemain Minecraft
+const EYE_HEIGHT = 1.62;        // tinggi mata awal (selanjutnya diatur lewat follow)
 const NEAR = 0.05;
 const FAR = 1000.0;
 const MAX_PITCH = (89.5 * Math.PI) / 180;
@@ -29,6 +29,14 @@ export class Camera {
     // Vektor prealokasi agar tidak ada alokasi per frame
     this.backOffset = [0, 0, 0];
     this.eyeOffset = [0, -EYE_HEIGHT, 0];
+    this.tmp = Mat4.create();
+  }
+
+  // Kamera mengikuti titik mata pemain (pos = posisi kaki, eye = tinggi mata)
+  follow(pos, eye) {
+    this.eyeOffset[0] = -pos[0];
+    this.eyeOffset[1] = -(pos[1] + eye);
+    this.eyeOffset[2] = -pos[2];
   }
 
   cyclePerspective() {
@@ -43,7 +51,8 @@ export class Camera {
     if (this.pitch < -MAX_PITCH) this.pitch = -MAX_PITCH;
   }
 
-  update(aspect) {
+  // bob (opsional): matriks view bobbing, hanya dipakai di orang pertama
+  update(aspect, bob = null) {
     Mat4.perspective(this.projMatrix, this.fovRad, aspect, NEAR, FAR);
 
     let yaw = this.yaw;
@@ -70,6 +79,10 @@ export class Camera {
     Mat4.rotateX(m, m, pitch);
     Mat4.rotateY(m, m, yaw);
     Mat4.translate(m, m, this.eyeOffset);
+    if (bob && this.mode === PerspectiveMode.FIRST_PERSON) {
+      Mat4.multiply(this.tmp, bob, m);
+      Mat4.copy(m, this.tmp);
+    }
 
     Mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
     Mat4.invert(this.invViewProj, this.viewProjMatrix);
