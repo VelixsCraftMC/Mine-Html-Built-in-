@@ -1,9 +1,9 @@
 {
   "id": "feature.camera",
   "name": "Minecraft Camera",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "type": "gameplay.camera",
-  "description": "Kamera orang pertama dan orang ketiga (belakang/depan) ala Minecraft; mengikuti posisi pemain (follow) dan menerima matriks view bobbing di orang pertama",
+  "description": "Kamera orang pertama dan orang ketiga (belakang/depan) ala Minecraft; mengikuti posisi pemain (follow) dan menerima matriks view bobbing di orang pertama; sensitivitas lewat setSensitivityScale(); posisi dunia kamera di camera.position",
   "dependencies": [
     "core.math"
   ]

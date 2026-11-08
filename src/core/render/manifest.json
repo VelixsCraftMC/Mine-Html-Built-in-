@@ -1,7 +1,7 @@
 {
   "id": "core.render",
   "name": "WebGL Rendering Pipeline",
-  "version": "1.1.0",
-  "description": "Pengelolaan WebGL2 context, pipeline lifecycle, compiling shader anti-leak, dan MeshVao (VAO+VBO dengan dispose lengkap)",
+  "version": "1.3.0",
+  "description": "Pengelolaan WebGL2 context, pipeline lifecycle, compiling shader anti-leak, dan MeshVao (VAO+VBO dengan dispose lengkap), TextureLoader dengan fallback dan fromCanvas (tekstur dari canvas 2D), warna placeholder bisa diatur, dan FullscreenQuad",
   "dependencies": ["core.platform"]
 }

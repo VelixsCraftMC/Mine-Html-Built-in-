@@ -1,0 +1,10 @@
+{
+  "playerName": ">_Console",
+  "cameraSensitivity": 1.0,
+  "touchCircle": {
+    "enabled": true,
+    "size": 100
+  },
+  "skinPath": "assets/skins/steve.png",
+  "capePath": "assets/cape/cape.png"
+}

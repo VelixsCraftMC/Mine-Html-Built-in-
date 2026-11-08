@@ -1,0 +1,8 @@
+{
+  "id": "feature.sky.sun",
+  "name": "Minecraft Sun",
+  "version": "1.0.0",
+  "type": "gameplay.environment",
+  "description": "Matahari billboard 60x60 blok pada jarak 100 dari assets/sky/sun.png (additive, latar hitam tidak terlihat). Bergerak di bidang timur-barat; elevasi lewat setElevation(derajat)",
+  "dependencies": ["core.render", "feature.camera", "feature.sky"]
+}

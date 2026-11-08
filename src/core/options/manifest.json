@@ -1,0 +1,7 @@
+{
+  "id": "core.options",
+  "name": "Game Options (option.json)",
+  "version": "1.0.0",
+  "description": "Memuat option.json lalu memvalidasi tiap kolom lewat skema. Nilai salah/hilang diganti default, jadi pemakai selalu menerima objek valid. Kolom baru cukup ditambah di option-schema.js",
+  "entry": "options.js"
+}

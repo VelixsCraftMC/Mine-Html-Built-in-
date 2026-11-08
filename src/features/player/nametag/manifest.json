@@ -1,0 +1,11 @@
+{
+  "id": "feature.player.nametag",
+  "name": "Player Nametag",
+  "version": "1.0.0",
+  "type": "gameplay.player",
+  "description": "Label nama pemain (billboard di atas kepala) yang hanya tampil di orang kedua (depan) dan orang ketiga (belakang). Teks digambar ke satu canvas yang dipakai ulang; nama diganti lewat setName()",
+  "dependencies": [
+    "core.render",
+    "feature.camera"
+  ]
+}

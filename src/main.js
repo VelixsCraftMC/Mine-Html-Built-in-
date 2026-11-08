@@ -4,9 +4,11 @@ import { WebGLContext } from "./core/render/webgl-context.js";
 import { TouchLook } from "./core/input/touch-look.js";
 import { TouchAction } from "./core/input/touch-action.js";
 import { TouchRing } from "./core/input/touch-ring.js";
+import { Options } from "./core/options/options.js";
 import { Camera } from "./features/camera/camera.js";
 import { PerspectiveButton } from "./features/camera/ui/perspective-btn.js";
 import { SkyRenderer } from "./features/sky/sky-renderer.js";
+import { NametagRenderer } from "./features/player/nametag/nametag-renderer.js";
 import { PlayerRenderer } from "./features/player/player-renderer.js";
 import { MoveInput } from "./features/movement/move-input.js";
 import { PlayerState } from "./features/movement/player-state.js";
@@ -32,29 +34,33 @@ class MineHTMLApp {
     this.moveControls = null;
     this.actions = null;
     this.touchRing = null;
+    this.nametag = null;
     this.lastTime = 0;
     this.frameId = null;
     this.boundLoop = this.loop.bind(this);
   }
 
-  init() {
+  async init() {
     if (!DeviceGuard.validate()) return;
     OrientationLock.init();
+    const opt = await Options.load("option.json"); // selalu valid (default bila gagal)
 
     this.glContext = new WebGLContext();
     this.touchLook = new TouchLook(this.glContext.canvas);
     this.touchAction = new TouchAction(this.glContext.canvas);
     this.camera = new Camera(70);
+    this.camera.setSensitivityScale(opt.cameraSensitivity);
     this.perspectiveBtn = new PerspectiveButton(this.camera);
     this.skyRenderer = new SkyRenderer(this.glContext);
-    this.playerRenderer = new PlayerRenderer(this.glContext);
+    this.playerRenderer = new PlayerRenderer(this.glContext, opt);
+    this.nametag = new NametagRenderer(this.glContext, opt.playerName);
 
     this.moveInput = new MoveInput();
     this.playerState = new PlayerState();
     this.physics = new PlayerPhysics(); // world nanti menyuplai getGround
     this.moveControls = new MoveControls(this.moveInput);
     this.actions = new AirborneGate(this.touchAction, this.playerState);
-    this.touchRing = new TouchRing();
+    this.touchRing = new TouchRing(opt.touchCircle);
 
     this.lastTime = performance.now();
     this.frameId = requestAnimationFrame(this.boundLoop);
@@ -87,6 +93,9 @@ class MineHTMLApp {
       // 2. Gambar Karakter Pemain (animasi pukul mengikuti input sentuh)
       gl.clear(gl.DEPTH_BUFFER_BIT);
       this.playerRenderer.render(this.camera, this.actions, s);
+
+      // 3. Nametag (hanya orang kedua/ketiga; dilewati di orang pertama)
+      this.nametag.render(this.camera, s);
     } catch (err) {
       console.error("[MineHTML Loop Safe Error]", err);
     }
@@ -102,11 +111,12 @@ class MineHTMLApp {
     if (this.touchLook) this.touchLook.dispose();
     if (this.touchAction) this.touchAction.dispose();
     if (this.skyRenderer) this.skyRenderer.dispose();
+    if (this.nametag) this.nametag.dispose();
     if (this.playerRenderer) this.playerRenderer.dispose();
     if (this.glContext) this.glContext.dispose();
   }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  new MineHTMLApp().init();
+  new MineHTMLApp().init().catch(err => console.error("[MineHTML Init Error]", err));
 });

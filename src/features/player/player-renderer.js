@@ -11,6 +11,7 @@ import { CapePhysics } from "./animation/cape-physics.js";
 import { PlayerShaderSource } from "./shaders/player-glsl.js";
 import { PerspectiveMode } from "../camera/camera.js";
 import { Mat4 } from "../../core/math/mat4.js";
+import { Options } from "../../core/options/options.js";
 
 // [nama bone, relatif pivot?] - bagian yang bergerak dipisah agar bisa dianimasikan
 const BONES = {
@@ -23,8 +24,10 @@ const BONES = {
 };
 
 export class PlayerRenderer {
-  constructor(glContext) {
+  // opt: hasil Options.load() (skinPath, capePath); tanpa itu memakai default
+  constructor(glContext, opt = Options.defaults()) {
     this.gl = glContext.getGL();
+    this.opt = opt;
     this.program = null;
     this.u = null;
     this.meshes = {};
@@ -53,8 +56,9 @@ export class PlayerRenderer {
     gl.useProgram(this.program);
     gl.uniform1i(this.u.tex, 0);
 
-    this.skinTex = TextureLoader.load(gl, "assets/skins/steve.png");
-    this.capeTex = TextureLoader.load(gl, "assets/cape/cape.png");
+    const def = Options.defaults(); // skin/jubah cadangan bila file pilihan gagal dimuat
+    this.skinTex = TextureLoader.load(gl, this.opt.skinPath, def.skinPath);
+    this.capeTex = this.opt.capePath ? TextureLoader.load(gl, this.opt.capePath, def.capePath) : null;
     this.meshes.cape = MeshVao.create(gl, CapeMesh.build());
     this.loadGeometry();
   }
@@ -77,7 +81,7 @@ export class PlayerRenderer {
   }
 
   draw(mesh, tex, mv, nm) {
-    if (!mesh) return;
+    if (!mesh || !tex) return; // tex null = bagian tidak dipakai (mis. tanpa jubah)
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D, tex);
     gl.uniformMatrix4fv(this.u.mv, false, mv);

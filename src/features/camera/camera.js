@@ -8,6 +8,7 @@ export const PerspectiveMode = {
 };
 
 const MODE_COUNT = 3;
+const BASE_SENSITIVITY = 0.0035; // rad per piksel geser pada skala 1,0
 const THIRD_PERSON_DIST = 4.0;  // jarak kamera orang ketiga (blok)
 const EYE_HEIGHT = 1.62;        // tinggi mata awal (selanjutnya diatur lewat follow)
 const NEAR = 0.05;
@@ -19,7 +20,7 @@ export class Camera {
     this.fovRad = (fovDeg * Math.PI) / 180;
     this.yaw = 0;
     this.pitch = 0;
-    this.sensitivity = 0.0035;
+    this.sensitivity = BASE_SENSITIVITY;
     this.mode = PerspectiveMode.FIRST_PERSON;
 
     this.viewMatrix = Mat4.create();
@@ -30,6 +31,7 @@ export class Camera {
     this.backOffset = [0, 0, 0];
     this.eyeOffset = [0, -EYE_HEIGHT, 0];
     this.tmp = Mat4.create();
+    this.position = [0, 0, 0]; // posisi kamera di dunia (termasuk orbit orang ketiga)
   }
 
   // Kamera mengikuti titik mata pemain (pos = posisi kaki, eye = tinggi mata)
@@ -37,6 +39,11 @@ export class Camera {
     this.eyeOffset[0] = -pos[0];
     this.eyeOffset[1] = -(pos[1] + eye);
     this.eyeOffset[2] = -pos[2];
+  }
+
+  // scale: pengali dari option.json (cameraSensitivity)
+  setSensitivityScale(scale) {
+    this.sensitivity = BASE_SENSITIVITY * scale;
   }
 
   cyclePerspective() {
@@ -83,6 +90,12 @@ export class Camera {
       Mat4.multiply(this.tmp, bob, m);
       Mat4.copy(m, this.tmp);
     }
+
+    // View = [R | t] kaku -> posisi dunia = -R^T * t
+    const c = this.position;
+    c[0] = -(m[0] * m[12] + m[1] * m[13] + m[2] * m[14]);
+    c[1] = -(m[4] * m[12] + m[5] * m[13] + m[6] * m[14]);
+    c[2] = -(m[8] * m[12] + m[9] * m[13] + m[10] * m[14]);
 
     Mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
     Mat4.invert(this.invViewProj, this.viewProjMatrix);
