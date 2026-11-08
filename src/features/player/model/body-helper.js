@@ -1,30 +1,29 @@
+const DEG = Math.PI / 180;
+const TWO_PI = Math.PI * 2;
+const MAX_NECK_TURN = 75 * DEG;   // batas putar leher Minecraft
+const DRAG_THRESHOLD = 50 * DEG;  // di atas ini badan ikut terseret
+const TICK_MS = 50;               // 1 tick Minecraft = 50 ms
+
+// Perilaku yaw badan ala Minecraft: badan diam selama kepala menoleh
+// <= 75 derajat, selebihnya badan terseret. Tidak tergantung FPS.
 export class BodyHelper {
   constructor() {
     this.bodyYaw = 0;
   }
 
-  // Normalisasi sudut ke rentang [-PI, +PI] (MathHelper.wrapDegrees)
   static wrapAngle(angle) {
-    while (angle > Math.PI) angle -= Math.PI * 2;
-    while (angle < -Math.PI) angle += Math.PI * 2;
-    return angle;
+    return angle - TWO_PI * Math.floor((angle + Math.PI) / TWO_PI);
   }
 
-  update(headYaw) {
+  update(headYaw, dtMs) {
     let delta = BodyHelper.wrapAngle(headYaw - this.bodyYaw);
+    if (delta > MAX_NECK_TURN) delta = MAX_NECK_TURN;
+    else if (delta < -MAX_NECK_TURN) delta = -MAX_NECK_TURN;
+    this.bodyYaw = headYaw - delta;
 
-    // Batas putaran leher Minecraft: 75 derajat (1.3089 rad)
-    const maxNeckTurn = (75.0 * Math.PI) / 180.0;
-    if (delta < -maxNeckTurn) {
-      this.bodyYaw = headYaw + maxNeckTurn;
-      delta = -maxNeckTurn;
-    } else if (delta > maxNeckTurn) {
-      this.bodyYaw = headYaw - maxNeckTurn;
-      delta = maxNeckTurn;
+    if (Math.abs(delta) > DRAG_THRESHOLD) {
+      this.bodyYaw += delta * (1 - Math.pow(0.8, dtMs / TICK_MS));
     }
-
-    // Tubuh berputar perlahan mengikuti kepala (0.08 per frame)
-    this.bodyYaw += delta * 0.08;
     return this.bodyYaw;
   }
 

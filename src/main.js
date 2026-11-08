@@ -2,6 +2,7 @@ import { DeviceGuard } from "./core/platform/device-guard.js";
 import { OrientationLock } from "./core/platform/orientation-lock.js";
 import { WebGLContext } from "./core/render/webgl-context.js";
 import { TouchLook } from "./core/input/touch-look.js";
+import { TouchAction } from "./core/input/touch-action.js";
 import { Camera } from "./features/camera/camera.js";
 import { PerspectiveButton } from "./features/camera/ui/perspective-btn.js";
 import { SkyRenderer } from "./features/sky/sky-renderer.js";
@@ -11,6 +12,7 @@ class MineHTMLApp {
   constructor() {
     this.glContext = null;
     this.touchLook = null;
+    this.touchAction = null;
     this.camera = null;
     this.perspectiveBtn = null;
     this.skyRenderer = null;
@@ -25,6 +27,7 @@ class MineHTMLApp {
 
     this.glContext = new WebGLContext();
     this.touchLook = new TouchLook(this.glContext.canvas);
+    this.touchAction = new TouchAction(this.glContext.canvas);
     this.camera = new Camera(70);
     this.perspectiveBtn = new PerspectiveButton(this.camera);
     this.skyRenderer = new SkyRenderer(this.glContext);
@@ -47,9 +50,9 @@ class MineHTMLApp {
       gl.disable(gl.DEPTH_TEST);
       this.skyRenderer.render(this.camera);
 
-      // 2. Gambar Karakter Pemain
+      // 2. Gambar Karakter Pemain (animasi pukul mengikuti input sentuh)
       gl.clear(gl.DEPTH_BUFFER_BIT);
-      this.playerRenderer.render(this.camera);
+      this.playerRenderer.render(this.camera, this.touchAction);
     } catch (err) {
       console.error("[MineHTML Loop Safe Error]", err);
     }
@@ -61,6 +64,7 @@ class MineHTMLApp {
     if (this.frameId) cancelAnimationFrame(this.frameId);
     if (this.perspectiveBtn) this.perspectiveBtn.dispose();
     if (this.touchLook) this.touchLook.dispose();
+    if (this.touchAction) this.touchAction.dispose();
     if (this.skyRenderer) this.skyRenderer.dispose();
     if (this.playerRenderer) this.playerRenderer.dispose();
     if (this.glContext) this.glContext.dispose();

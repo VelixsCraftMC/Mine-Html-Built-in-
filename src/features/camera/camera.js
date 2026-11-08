@@ -1,10 +1,18 @@
 import { Mat4 } from "../../core/math/mat4.js";
 
+// Urutan tombol perspektif Minecraft: Dalam -> Belakang -> Depan -> Dalam
 export const PerspectiveMode = {
-  FIRST_PERSON: 0,       // Kamera Dalam
-  THIRD_PERSON_FRONT: 1, // Kamera Depan (melihat wajah)
-  THIRD_PERSON_BACK: 2   // Kamera Belakang (melihat punggung)
+  FIRST_PERSON: 0,
+  THIRD_PERSON_BACK: 1,
+  THIRD_PERSON_FRONT: 2
 };
+
+const MODE_COUNT = 3;
+const THIRD_PERSON_DIST = 4.0;  // jarak kamera orang ketiga (blok)
+const EYE_HEIGHT = 1.62;        // tinggi mata pemain Minecraft
+const NEAR = 0.05;
+const FAR = 1000.0;
+const MAX_PITCH = (89.5 * Math.PI) / 180;
 
 export class Camera {
   constructor(fovDeg = 70) {
@@ -18,61 +26,50 @@ export class Camera {
     this.projMatrix = Mat4.create();
     this.viewProjMatrix = Mat4.create();
     this.invViewProj = Mat4.create();
+    // Vektor prealokasi agar tidak ada alokasi per frame
+    this.backOffset = [0, 0, 0];
+    this.eyeOffset = [0, -EYE_HEIGHT, 0];
   }
 
   cyclePerspective() {
-    // Urutan: Depan -> Belakang -> Dalam
-    if (this.mode === PerspectiveMode.FIRST_PERSON) {
-      this.mode = PerspectiveMode.THIRD_PERSON_FRONT;
-    } else if (this.mode === PerspectiveMode.THIRD_PERSON_FRONT) {
-      this.mode = PerspectiveMode.THIRD_PERSON_BACK;
-    } else {
-      this.mode = PerspectiveMode.FIRST_PERSON;
-    }
+    this.mode = (this.mode + 1) % MODE_COUNT;
     return this.mode;
   }
 
   rotate(deltaX, deltaY) {
     this.yaw += deltaX * this.sensitivity;
     this.pitch -= deltaY * this.sensitivity;
-
-    const maxPitch = (89.5 * Math.PI) / 180;
-    if (this.pitch > maxPitch) this.pitch = maxPitch;
-    if (this.pitch < -maxPitch) this.pitch = -maxPitch;
+    if (this.pitch > MAX_PITCH) this.pitch = MAX_PITCH;
+    if (this.pitch < -MAX_PITCH) this.pitch = -MAX_PITCH;
   }
 
   update(aspect) {
-    Mat4.perspective(this.projMatrix, this.fovRad, aspect, 0.1, 1000.0);
+    Mat4.perspective(this.projMatrix, this.fovRad, aspect, NEAR, FAR);
 
-    // Standard Minecraft: Jarak Third-Person adalah 4.0 meter
-    let curYaw = this.yaw;
-    let curPitch = this.pitch;
+    let yaw = this.yaw;
+    let pitch = this.pitch;
     let dist = 0.0;
 
     if (this.mode === PerspectiveMode.THIRD_PERSON_FRONT) {
-      curYaw = this.yaw + Math.PI; // Putar balik 180 derajat menghadap wajah
-      curPitch = -this.pitch;      // Invert pitch agar tetap memfokuskan kepala
-      dist = 4.0;
+      // Seperti Minecraft: yaw +180 dan pitch dibalik, kamera menghadap wajah
+      yaw += Math.PI;
+      pitch = -pitch;
+      dist = THIRD_PERSON_DIST;
     } else if (this.mode === PerspectiveMode.THIRD_PERSON_BACK) {
-      dist = 4.0;                  // Mundur 4 blok melihat punggung
+      dist = THIRD_PERSON_DIST;
     }
-
-    // Bangun View Matrix
-    const cosY = Math.cos(curYaw), sinY = Math.sin(curYaw);
-    const cosP = Math.cos(curPitch), sinP = Math.sin(curPitch);
 
     const m = this.viewMatrix;
     for (let i = 0; i < 16; i++) m[i] = (i % 5 === 0) ? 1 : 0;
 
-    // Geser kamera mundur sejauh 'dist' blok
-    if (dist > 0) Mat4.translate(m, m, [0, 0, -dist]);
-
-    // Terapkan rotasi pandangan
-    Mat4.rotateX(m, m, curPitch);
-    Mat4.rotateY(m, m, curYaw);
-
-    // Pivot tinggi mata pemain Minecraft (1.62 meter)
-    Mat4.translate(m, m, [0, -1.62, 0]);
+    // Kamera mengorbit titik mata sejauh dist (termasuk pitch)
+    if (dist > 0) {
+      this.backOffset[2] = -dist;
+      Mat4.translate(m, m, this.backOffset);
+    }
+    Mat4.rotateX(m, m, pitch);
+    Mat4.rotateY(m, m, yaw);
+    Mat4.translate(m, m, this.eyeOffset);
 
     Mat4.multiply(this.viewProjMatrix, this.projMatrix, this.viewMatrix);
     Mat4.invert(this.invViewProj, this.viewProjMatrix);

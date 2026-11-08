@@ -6,17 +6,21 @@ export const PlayerShaderSource = {
 
     uniform mat4 u_projection;
     uniform mat4 u_modelView;
+    uniform mat4 u_normalMatrix;
 
     out vec2 v_uv;
     out float v_light;
 
     void main() {
       v_uv = a_uv;
-      // Transform normal model ke ruang pandang mata
-      vec3 norm = normalize(mat3(u_modelView) * a_normal);
-      vec3 lightDir = normalize(vec3(0.25, 0.85, 0.45));
-      float diff = max(dot(norm, lightDir), 0.0);
-      v_light = 0.60 + 0.40 * diff;
+      // Cahaya entitas Minecraft: dua arah dari atas + ambient 0.4.
+      // Normal diputar oleh matriks model (dunia), bukan kamera,
+      // jadi pencahayaan tidak ikut berubah saat kamera berputar.
+      vec3 n = normalize(mat3(u_normalMatrix) * a_normal);
+      vec3 l0 = normalize(vec3(0.2, 1.0, -0.7));
+      vec3 l1 = normalize(vec3(-0.2, 1.0, 0.7));
+      float diff = max(dot(n, l0), 0.0) + max(dot(n, l1), 0.0);
+      v_light = min(1.0, 0.4 + 0.6 * diff);
 
       gl_Position = u_projection * u_modelView * vec4(a_position, 1.0);
     }

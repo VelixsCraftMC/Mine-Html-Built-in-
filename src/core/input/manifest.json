@@ -1,6 +1,6 @@
 {
   "id": "core.input",
-  "name": "Touch Look Controller",
-  "version": "1.0.0",
-  "description": "Deteksi rotasi kamera sentuh multi-touch tanpa latency gesture browser"
+  "name": "Touch Input Controllers",
+  "version": "1.1.0",
+  "description": "TouchLook (rotasi kamera) dan TouchAction (tap = serang, tahan = hancurkan) berbasis polling tanpa timer"
 }

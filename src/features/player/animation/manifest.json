@@ -1,0 +1,8 @@
+{
+  "id": "feature.player.animation",
+  "name": "Player Animation",
+  "version": "1.0.0",
+  "type": "gameplay.animation",
+  "description": "Animasi pukul/hancurkan dan napas idle ala Minecraft; sumber aksi cukup menyediakan consumeAttack() dan isMining()",
+  "dependencies": ["core.math", "feature.player"]
+}

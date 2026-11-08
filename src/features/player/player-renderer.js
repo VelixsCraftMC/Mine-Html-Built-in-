@@ -1,135 +1,130 @@
 import { ShaderProgram } from "../../core/render/shader-program.js";
 import { TextureLoader } from "../../core/render/texture-loader.js";
+import { MeshVao } from "../../core/render/mesh-vao.js";
 import { GeoParser } from "./model/geo-parser.js";
-import { HeadMesh } from "./model/head-mesh.js";
-import { BodyMesh } from "./model/body-mesh.js";
+import { BoneMesh } from "./model/bone-mesh.js";
 import { CapeMesh } from "./model/cape-mesh.js";
 import { BodyHelper } from "./model/body-helper.js";
+import { PlayerPose } from "./player-pose.js";
+import { PlayerAnimator } from "./animation/player-animator.js";
 import { PlayerShaderSource } from "./shaders/player-glsl.js";
 import { PerspectiveMode } from "../camera/camera.js";
-import { Mat4 } from "../../core/math/mat4.js";
+
+// [nama bone, relatif pivot?] - bagian yang bergerak dipisah agar bisa dianimasikan
+const BONES = {
+  body: [["Body"], false],
+  legs: [["Right Leg", "Left Leg"], false],
+  rightArm: [["Right Arm"], true],
+  leftArm: [["Left Arm"], true],
+  head: [["Head"], true]
+};
 
 export class PlayerRenderer {
   constructor(glContext) {
     this.gl = glContext.getGL();
     this.program = null;
-    this.armVao = null; this.armCount = 0;
-    this.headVao = null; this.headCount = 0;
-    this.bodyVao = null; this.bodyCount = 0;
-    this.capeVao = null; this.capeCount = 0;
-    this.skinTex = null; this.capeTex = null;
+    this.u = null;
+    this.meshes = {};
+    this.skinTex = null;
+    this.capeTex = null;
     this.bodyHelper = new BodyHelper();
-    // Buffer matriks mandiri agar tidak terjadi memory corruption
-    this.mvBody = Mat4.create();
-    this.mvHead = Mat4.create();
-    this.mvCape = Mat4.create();
-    this.mvHand = Mat4.create();
+    this.pose = new PlayerPose();
+    this.animator = new PlayerAnimator();
+    this.lastTime = performance.now();
+    this.disposed = false;
     this.init();
   }
 
-  async init() {
+  init() {
     const gl = this.gl;
     this.program = ShaderProgram.create(gl, PlayerShaderSource.vertex, PlayerShaderSource.fragment);
-    this.skinTex = TextureLoader.load(gl, "assets/skins/steve.png");
-    this.capeTex = TextureLoader.load(gl, "assets/cape/mojang_cape.png");
+    // Lokasi uniform di-cache sekali, bukan dicari setiap frame
+    this.u = {
+      proj: gl.getUniformLocation(this.program, "u_projection"),
+      mv: gl.getUniformLocation(this.program, "u_modelView"),
+      nm: gl.getUniformLocation(this.program, "u_normalMatrix"),
+      tex: gl.getUniformLocation(this.program, "u_texture")
+    };
+    gl.useProgram(this.program);
+    gl.uniform1i(this.u.tex, 0);
 
-    this.capeVao = this.createVao(CapeMesh.build(), c => this.capeCount = c);
+    this.skinTex = TextureLoader.load(gl, "assets/skins/steve.png");
+    this.capeTex = TextureLoader.load(gl, "assets/cape/cape.png");
+    this.meshes.cape = MeshVao.create(gl, CapeMesh.build());
+    this.loadGeometry();
+  }
+
+  async loadGeometry() {
     try {
       const res = await fetch("assets/models/player/wide.geo.json");
+      if (!res.ok) throw new Error("HTTP " + res.status);
       const geo = await res.json();
-      this.armVao = this.createVao(GeoParser.extractBoneCubes(geo, "Right Arm"), c => this.armCount = c);
-      this.headVao = this.createVao(HeadMesh.build(geo), c => this.headCount = c);
-      this.bodyVao = this.createVao(BodyMesh.build(geo), c => this.bodyCount = c);
-    } catch (_) {}
+      if (this.disposed) return;
+      const gl = this.gl, m = this.meshes;
+      m.arm = MeshVao.create(gl, GeoParser.extractBoneCubes(geo, "Right Arm"));
+      for (const key of Object.keys(BONES)) {
+        const [names, rel] = BONES[key];
+        m[key] = MeshVao.create(gl, BoneMesh.build(geo, names, rel));
+      }
+    } catch (err) {
+      console.warn("[PlayerRenderer] Model pemain gagal dimuat:", err);
+    }
   }
 
-  createVao(mesh, setCount) {
-    if (!mesh) return null;
+  draw(mesh, tex, mv, nm) {
+    if (!mesh) return;
     const gl = this.gl;
-    setCount(mesh.positions.length / 3);
-    const vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
-    [{ loc: 0, s: 3, d: mesh.positions }, { loc: 1, s: 2, d: mesh.uvs }, { loc: 2, s: 3, d: mesh.normals }].forEach(b => {
-      const vbo = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
-      gl.bufferData(gl.ARRAY_BUFFER, b.d, gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(b.loc);
-      gl.vertexAttribPointer(b.loc, b.s, gl.FLOAT, false, 0, 0);
-    });
-    gl.bindVertexArray(null);
-    return vao;
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.uniformMatrix4fv(this.u.mv, false, mv);
+    gl.uniformMatrix4fv(this.u.nm, false, nm);
+    MeshVao.draw(gl, mesh);
   }
 
-  render(camera) {
+  // actions (opsional): objek dengan consumeAttack() dan isMining()
+  render(camera, actions) {
     if (!this.program) return;
     const gl = this.gl;
+    const now = performance.now();
+    const dt = Math.min(now - this.lastTime, 100);
+    this.lastTime = now;
+    this.animator.update(dt, actions);
+    // Badan selalu diperbarui, termasuk saat orang pertama, seperti Minecraft
+    const bodyYaw = this.bodyHelper.update(camera.yaw, dt);
+
     gl.useProgram(this.program);
     gl.enable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.uniformMatrix4fv(this.u.proj, false, camera.projMatrix);
 
-    const uProj = gl.getUniformLocation(this.program, "u_projection");
-    const uMv = gl.getUniformLocation(this.program, "u_modelView");
-    const uTex = gl.getUniformLocation(this.program, "u_texture");
-    gl.uniformMatrix4fv(uProj, false, camera.projMatrix);
-
+    const mesh = this.meshes, skin = this.skinTex;
     if (camera.mode === PerspectiveMode.FIRST_PERSON) {
-      if (!this.armVao) return;
-      const mv = this.mvHand;
-      for (let i = 0; i < 16; i++) mv[i] = (i % 5 === 0) ? 1 : 0;
-      Mat4.translate(mv, mv, [0.64, -0.60, -0.72]);
-      Mat4.rotateY(mv, mv, (45.0 * Math.PI) / 180.0);
-      Mat4.translate(mv, mv, [-1.0, 3.6, 3.5]);
-      Mat4.rotateZ(mv, mv, (120.0 * Math.PI) / 180.0);
-      Mat4.rotateX(mv, mv, (200.0 * Math.PI) / 180.0);
-      Mat4.rotateY(mv, mv, (-135.0 * Math.PI) / 180.0);
-      Mat4.translate(mv, mv, [5.6, 0.0, 0.0]);
-      Mat4.translate(mv, mv, [-0.3125, 0.125, 0.0]);
-
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.skinTex);
-      gl.uniform1i(uTex, 0); gl.uniformMatrix4fv(uMv, false, mv);
-      gl.bindVertexArray(this.armVao); gl.drawArrays(gl.TRIANGLES, 0, this.armCount);
+      const h = this.pose.updateHand(this.animator.swingProgress);
+      this.draw(mesh.arm, skin, h, h);
     } else {
-      const bodyYaw = this.bodyHelper.update(camera.yaw);
-
-      // 1. Badan & Kaki (Tegak berdiri Y = 0 s/d 1.5 meter)
-      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.skinTex);
-      gl.uniform1i(uTex, 0);
-      if (this.bodyVao) {
-        Mat4.rotateY(this.mvBody, camera.viewMatrix, -bodyYaw);
-        gl.uniformMatrix4fv(uMv, false, this.mvBody);
-        gl.bindVertexArray(this.bodyVao); gl.drawArrays(gl.TRIANGLES, 0, this.bodyCount);
-      }
-
-      // 2. Jubah Mojang (Tergantung di punggung atas Y = 1.45, Z = 0.125)
-      if (this.capeVao) {
-        Mat4.rotateY(this.mvCape, camera.viewMatrix, -bodyYaw);
-        Mat4.translate(this.mvCape, this.mvCape, [0, 1.45, 0.125]);
-        Mat4.rotateX(this.mvCape, this.mvCape, (12.0 * Math.PI) / 180.0);
-        gl.bindTexture(gl.TEXTURE_2D, this.capeTex);
-        gl.uniformMatrix4fv(uMv, false, this.mvCape);
-        gl.bindVertexArray(this.capeVao); gl.drawArrays(gl.TRIANGLES, 0, this.capeCount);
-      }
-
-      // 3. Kepala (Tegak di atas leher Y = 1.5, menoleh mengikuti kamera)
-      if (this.headVao) {
-        Mat4.translate(this.mvHead, camera.viewMatrix, [0, 1.5, 0]);
-        Mat4.rotateY(this.mvHead, this.mvHead, -camera.yaw);
-        Mat4.rotateX(this.mvHead, this.mvHead, camera.pitch);
-        gl.bindTexture(gl.TEXTURE_2D, this.skinTex);
-        gl.uniformMatrix4fv(uMv, false, this.mvHead);
-        gl.bindVertexArray(this.headVao); gl.drawArrays(gl.TRIANGLES, 0, this.headCount);
-      }
+      this.pose.update(camera, bodyYaw, this.animator);
+      const m = this.pose.model, mv = this.pose.modelView;
+      this.draw(mesh.legs, skin, mv.legs, m.legs);
+      this.draw(mesh.body, skin, mv.body, m.body);
+      this.draw(mesh.rightArm, skin, mv.rightArm, m.rightArm);
+      this.draw(mesh.leftArm, skin, mv.leftArm, m.leftArm);
+      this.draw(mesh.cape, this.capeTex, mv.cape, m.cape);
+      this.draw(mesh.head, skin, mv.head, m.head);
     }
     gl.bindVertexArray(null);
   }
 
   dispose() {
+    this.disposed = true;
     const gl = this.gl;
     if (gl) {
-      [this.armVao, this.headVao, this.bodyVao, this.capeVao].forEach(v => v && gl.deleteVertexArray(v));
+      Object.values(this.meshes).forEach(m => MeshVao.dispose(gl, m));
       TextureLoader.dispose(gl, this.skinTex);
       TextureLoader.dispose(gl, this.capeTex);
       ShaderProgram.dispose(gl, this.program);
     }
+    this.meshes = {};
+    this.program = null;
+    this.gl = null;
   }
 }
