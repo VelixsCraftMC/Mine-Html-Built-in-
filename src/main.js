@@ -5,7 +5,7 @@ import { TouchLook } from "./core/input/touch-look.js";
 import { TouchAction } from "./core/input/touch-action.js";
 import { TouchRing } from "./core/input/touch-ring.js";
 import { Options } from "./core/options/options.js";
-import { Camera } from "./features/camera/camera.js";
+import { Camera, PerspectiveMode } from "./features/camera/camera.js";
 import { PerspectiveButton } from "./features/camera/ui/perspective-btn.js";
 import { SkyRenderer } from "./features/sky/sky-renderer.js";
 import { NametagRenderer } from "./features/player/nametag/nametag-renderer.js";
@@ -16,6 +16,8 @@ import { PlayerPhysics } from "./features/movement/physics.js";
 import { ViewBob } from "./features/movement/view-bob.js";
 import { AirborneGate } from "./features/movement/air-gate.js";
 import { MoveControls } from "./features/movement/ui/move-controls.js";
+import { WorldLoader } from "./features/world/world-loader.js";
+import { WorldRenderer } from "./features/world/world-renderer.js";
 
 const MAX_DT_MS = 100; // batasi lonjakan waktu (tab di-background, lag)
 
@@ -28,6 +30,8 @@ class MineHTMLApp {
     this.perspectiveBtn = null;
     this.skyRenderer = null;
     this.playerRenderer = null;
+    this.world = null;
+    this.worldRenderer = null;
     this.moveInput = null;
     this.playerState = null;
     this.physics = null;
@@ -57,13 +61,26 @@ class MineHTMLApp {
 
     this.moveInput = new MoveInput();
     this.playerState = new PlayerState();
-    this.physics = new PlayerPhysics(); // world nanti menyuplai getGround
+    await this.initWorld();
+    this.physics = new PlayerPhysics((x, y, z) => (this.world ? this.world.groundAt(x, y, z) : 0));
     this.moveControls = new MoveControls(this.moveInput);
     this.actions = new AirborneGate(this.touchAction, this.playerState);
     this.touchRing = new TouchRing(opt.touchCircle);
 
     this.lastTime = performance.now();
     this.frameId = requestAnimationFrame(this.boundLoop);
+  }
+
+  // Dunia dari dimension/*.json. Gagal dimuat = game tetap jalan tanpa dunia (ground 0).
+  async initWorld() {
+    try {
+      const loaded = await WorldLoader.load();
+      this.world = loaded.world;
+      this.worldRenderer = new WorldRenderer(this.glContext, loaded);
+      this.playerState.pos = loaded.spawn;
+    } catch (err) {
+      console.error("[MineHTML World Error]", err);
+    }
   }
 
   loop() {
@@ -76,6 +93,7 @@ class MineHTMLApp {
       this.lastTime = now;
       const s = this.playerState;
       this.physics.update(s, this.moveInput, this.camera.yaw, dtMs);
+      if (this.world) this.world.update(dtMs / 1000, s.pos);
       ViewBob.update(s, dtMs);
       this.moveControls.sync(s);
       this.touchRing.update(this.actions.holdProgress(), this.actions.touchX, this.actions.touchY);
@@ -90,11 +108,14 @@ class MineHTMLApp {
       gl.disable(gl.DEPTH_TEST);
       this.skyRenderer.render(this.camera);
 
-      // 2. Gambar Karakter Pemain (animasi pukul mengikuti input sentuh)
-      gl.clear(gl.DEPTH_BUFFER_BIT);
+      // 2. Dunia (blok)
+      if (this.worldRenderer) this.worldRenderer.render(this.camera);
+
+      // 3. Karakter Pemain (animasi pukul mengikuti input sentuh); tangan orang pertama selalu di depan
+      if (this.camera.mode === PerspectiveMode.FIRST_PERSON) gl.clear(gl.DEPTH_BUFFER_BIT);
       this.playerRenderer.render(this.camera, this.actions, s);
 
-      // 3. Nametag (hanya orang kedua/ketiga; dilewati di orang pertama)
+      // 4. Nametag (hanya orang kedua/ketiga; dilewati di orang pertama)
       this.nametag.render(this.camera, s);
     } catch (err) {
       console.error("[MineHTML Loop Safe Error]", err);
@@ -113,10 +134,12 @@ class MineHTMLApp {
     if (this.skyRenderer) this.skyRenderer.dispose();
     if (this.nametag) this.nametag.dispose();
     if (this.playerRenderer) this.playerRenderer.dispose();
+    if (this.worldRenderer) this.worldRenderer.dispose();
     if (this.glContext) this.glContext.dispose();
   }
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  new MineHTMLApp().init().catch(err => console.error("[MineHTML Init Error]", err));
-});
+const start = () => new MineHTMLApp().init().catch(err => console.error("[MineHTML Init Error]", err));
+// Aman dimuat kapan saja: sebelum DOM siap (tunggu) atau sesudahnya (jalan langsung)
+if (document.readyState === "loading") window.addEventListener("DOMContentLoaded", start);
+else start();

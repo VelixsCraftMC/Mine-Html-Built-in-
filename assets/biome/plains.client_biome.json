@@ -1,0 +1,14 @@
+{
+  "client_biome": {
+    "description": { "identifier": "minecraft:plains" },
+    "components": {
+      "fog": "fog_plains",
+      "water": "#44AFF5",
+      "climate": { "temperature": 0.8, "downfall": 0.4 },
+      "atmosphere_identifier": "default_atmospherics",
+      "color_grading": "default_color_grading",
+      "lighting": "default_lighting",
+      "water_identifier": "default_water"
+    }
+  }
+}

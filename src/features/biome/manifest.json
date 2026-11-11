@@ -1,0 +1,8 @@
+{
+  "id": "feature.biome",
+  "name": "Biome, Fog & Colormap",
+  "version": "1.0.0",
+  "type": "gameplay.environment",
+  "description": "Memuat biome klien (assets/biome), pengaturan kabut (assets/fog) dan warna rumput dari colormap berdasarkan suhu/curah hujan. Berkas hilang = nilai cadangan, bukan error",
+  "dependencies": ["core.json", "core.color"]
+}

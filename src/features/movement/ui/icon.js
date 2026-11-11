@@ -1,14 +1,15 @@
+import { Assets } from "../../../core/assets.js";
 const DIR = "assets/control/";
 
 // Satu ikon tombol bertekstur pixel-art (normal / _pressed). Hanya visual, tanpa input.
 export class Icon {
   constructor(parent, name) {
-    this.normal = `url('${DIR}${name}.png')`;
-    this.down = `url('${DIR}${name}_pressed.png')`;
+    this.normal = `url('${Assets.url(DIR + name + ".png")}')`;
+    this.down = `url('${Assets.url(DIR + name + "_pressed.png")}')`;
     this.pressed = false;
     // Prapemuatan agar tidak berkedip saat pertama ditekan
     this.preload = new Image();
-    this.preload.src = `${DIR}${name}_pressed.png`;
+    this.preload.src = Assets.url(`${DIR}${name}_pressed.png`);
 
     const el = document.createElement("div");
     el.style.cssText = `position:fixed;background-repeat:no-repeat;background-size:100% 100%;

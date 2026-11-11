@@ -1,0 +1,8 @@
+{
+  "id": "feature.block",
+  "name": "Block System (JSON + Components)",
+  "version": "1.0.0",
+  "type": "gameplay.block",
+  "description": "Block dibangun dari assets/block/**/*.json: { identifier, components }. Satu komponen = satu berkas di components/ (displayname, category, geometry, textures, loot, transforplacetop, collision, selection, lightdampening). Komponen baru: berkas + satu baris di components/index.js, tanpa menyentuh berkas lain. Tekstur dipakai bersama lewat path yang sama (satu slot atlas)",
+  "dependencies": ["core.json", "core.color", "shaders.render"]
+}

@@ -1,0 +1,21 @@
+{
+  "identifier": "minecraft:grass_block",
+  "components": {
+    "displayname": "Grass Block",
+    "category": "nature",
+    "geometry": "full_block",
+    "textures": {
+      "render_method": "opaque",
+      "top": { "texture": "block/grass_block/top", "tint": "biome" },
+      "side": {
+        "texture": "block/grass_block/side",
+        "overlay": "block/grass_block/side_overlay",
+        "tint": "biome"
+      },
+      "bottom": "block/dirt/dirt",
+      "carried": { "texture": "block/grass_block/carried", "overlay_color": "#79c05a" }
+    },
+    "loot": ["minecraft:dirt"],
+    "transforplacetop": { "to": "minecraft:dirt", "tick": 10 }
+  }
+}

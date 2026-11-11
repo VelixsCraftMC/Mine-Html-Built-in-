@@ -1,0 +1,17 @@
+{
+  "format_version": "1.0.0",
+  "dimension": {
+    "identifier": "minecraft:overworld",
+    "biome": "minecraft:plains",
+    "height": 64,
+    "render_distance": 4,
+    "spawn": { "x": 8.5, "z": 8.5 },
+    "generator": {
+      "type": "flat",
+      "layers": [
+        { "block": "minecraft:dirt", "count": 3 },
+        { "block": "minecraft:grass_block", "count": 1 }
+      ]
+    }
+  }
+}

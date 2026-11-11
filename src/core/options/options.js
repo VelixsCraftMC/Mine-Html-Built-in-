@@ -1,3 +1,4 @@
+import { Assets } from "../assets.js";
 import { OptionSchema } from "./option-schema.js";
 
 const isLeaf = node => typeof node.check === "function";
@@ -29,7 +30,7 @@ export class Options {
   // Tidak pernah melempar error: gagal fetch/parse = default
   static async load(url = "option.json") {
     try {
-      const res = await fetch(url, { cache: "no-cache" });
+      const res = await Assets.fetch(url, { cache: "no-cache" });
       if (!res.ok) throw new Error("HTTP " + res.status);
       return this.sanitize(await res.json());
     } catch (err) {

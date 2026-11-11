@@ -1,0 +1,10 @@
+{
+  "identifier": "example:glow_dirt",
+  "components": {
+    "displayname": "Glow Dirt",
+    "category": "nature",
+    "textures": { "*": "minecraft:block/dirt/dirt" },
+    "lightdampening": 8,
+    "loot": ["minecraft:dirt"]
+  }
+}

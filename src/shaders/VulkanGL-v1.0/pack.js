@@ -3,6 +3,7 @@ import { SkyShader } from "./sky.js";
 import { SunShader } from "./sun.js";
 import { CloudShader } from "./cloud.js";
 import { NametagShader } from "./nametag.js";
+import { BlocksShader } from "./blocks.js";
 
 // Shader pack bawaan. Kunci di 'shaders' = nama yang dipakai fitur lewat ShaderPack.create(gl, nama).
 export const VulkanGL = {
@@ -14,6 +15,7 @@ export const VulkanGL = {
     sky: SkyShader,
     sun: SunShader,
     clouds: CloudShader,
-    nametag: NametagShader
+    nametag: NametagShader,
+    blocks: BlocksShader
   }
 };

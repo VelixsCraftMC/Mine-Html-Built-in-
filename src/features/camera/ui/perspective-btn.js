@@ -1,3 +1,4 @@
+import { Assets } from "../../../core/assets.js";
 export class PerspectiveButton {
   constructor(camera) {
     this.camera = camera;
@@ -20,7 +21,7 @@ export class PerspectiveButton {
       padding: 0;
       margin: 0;
       background-color: transparent;
-      background-image: url('assets/control/perspective.png');
+      background-image: url('${Assets.url("assets/control/perspective.png")}');
       background-repeat: no-repeat;
       background-position: center;
       background-size: 32px 32px;

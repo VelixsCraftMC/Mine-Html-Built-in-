@@ -1,0 +1,7 @@
+{
+  "id": "example",
+  "name": "Contoh Mod Native",
+  "version": "1.0.0",
+  "description": "Mod contoh: satu block baru yang memakai ulang tekstur dirt (tanpa menggandakan file). Aktifkan dengan menambahkan \"example\" ke mods/mods.json",
+  "blocks": ["blocks/glow_dirt.json"]
+}

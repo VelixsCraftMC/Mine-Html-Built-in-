@@ -1,3 +1,4 @@
+import { Assets } from "../../core/assets.js";
 import { ShaderProgram } from "../../shaders/RenderVulkan/shader-program.js";
 import { ShaderPack } from "../../shaders/shader-pack.js";
 import { TextureLoader } from "../../shaders/RenderVulkan/texture-loader.js";
@@ -65,7 +66,7 @@ export class PlayerRenderer {
 
   async loadGeometry() {
     try {
-      const res = await fetch("assets/models/player/wide.geo.json");
+      const res = await Assets.fetch("assets/models/entity/player/wide.geo.json");
       if (!res.ok) throw new Error("HTTP " + res.status);
       const geo = await res.json();
       if (this.disposed) return;
@@ -103,9 +104,7 @@ export class PlayerRenderer {
     // Memukul atau bergerak: badan menyusul arah kepala
     const follow = this.animator.swinging || (state !== null && state.moving);
     const bodyYaw = this.bodyHelper.update(camera.yaw, dt, follow);
-
     if (state) this.cape.update(state.pos, bodyYaw, state.walkDist, state.bobAmt, dt);
-
     gl.useProgram(this.program);
     gl.enable(gl.DEPTH_TEST);
     gl.disable(gl.CULL_FACE);

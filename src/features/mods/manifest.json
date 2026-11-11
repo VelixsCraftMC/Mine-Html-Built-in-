@@ -1,0 +1,8 @@
+{
+  "id": "feature.mods",
+  "name": "Native Mods",
+  "version": "1.0.0",
+  "type": "gameplay.mods",
+  "description": "Mod native sementara: mods/mods.json memilih mod aktif, mods/<id>/manifest.json mendaftar berkas block. Mod memakai format JSON/PNG yang sama dengan assets/ (namespace = id mod). Mod rusak dilewati",
+  "dependencies": ["feature.block", "core.json"]
+}

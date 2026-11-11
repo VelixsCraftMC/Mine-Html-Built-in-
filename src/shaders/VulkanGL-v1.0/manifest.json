@@ -3,7 +3,7 @@
   "name": "VulkanGL",
   "version": "1.0",
   "type": "shaderpack",
-  "description": "Shader pack bawaan MineHTML (GLSL ES 3.00): player, sky, sun, clouds, nametag. Satu file per shader; pack.js mendaftarkan semuanya",
+  "description": "Shader pack bawaan MineHTML (GLSL ES 3.00): player, sky, sun, clouds, nametag, blocks. Satu file per shader; pack.js mendaftarkan semuanya",
   "entry": "pack.js",
-  "shaders": ["player", "sky", "sun", "clouds", "nametag"]
+  "shaders": ["player", "sky", "sun", "clouds", "nametag", "blocks"]
 }

@@ -1,0 +1,8 @@
+{
+  "id": "feature.world",
+  "name": "World (Dimension JSON)",
+  "version": "1.0.0",
+  "type": "gameplay.world",
+  "description": "Dunia dibangun dari dimension/*.json: chunk 16xHx16 (Uint16), generator terdaftar (flat), streaming chunk terdekat-dulu dengan pembuangan chunk jauh, mesher face-culling berbagi buffer kerja, satu atlas + satu draw per chunk, kabut dari biome. Semua sumber daya GPU dilepas di dispose()",
+  "dependencies": ["feature.block", "feature.biome", "feature.mods", "shaders.render", "shaders"]
+}

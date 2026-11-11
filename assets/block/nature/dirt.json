@@ -1,0 +1,9 @@
+{
+  "identifier": "minecraft:dirt",
+  "components": {
+    "displayname": "Dirt",
+    "category": "nature",
+    "textures": { "*": "block/dirt/dirt" },
+    "loot": ["minecraft:dirt"]
+  }
+}
